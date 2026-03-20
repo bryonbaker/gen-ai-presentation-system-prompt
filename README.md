@@ -1,4 +1,9 @@
-● The system prompt is saved at:
+# Overview
+
+This repository enables you to "vibe clode" powerpoint presentations in a defined Red Hat style.
+
+# Instructions
+The system prompt is saved at:
 
   gen-ai-presentation-system-prompt/SYSTEM_PROMPT.md
 
