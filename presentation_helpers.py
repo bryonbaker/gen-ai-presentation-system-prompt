@@ -19,8 +19,8 @@ from pptx.enum.shapes import MSO_SHAPE
 # ============================================================
 # PATHS
 # ============================================================
-TEMPLATE_PATH = '/home/bryon/Documents/FinOS/0 - clean template.pptx'
-VENV_PATH = '/home/bryon/Documents/FinOS/.venv'
+TEMPLATE_PATH = './FinOS/0 - clean template.pptx'
+VENV_PATH = './FinOS/.venv'
 
 # ============================================================
 # RED HAT BRAND COLORS

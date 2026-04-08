@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evaluating Financial AI</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;500;600;700;800;900&family=Red+Hat+Text:wght@400;500;600;700&family=Red+Hat+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --rh-red: #EE0000;
+    --rh-red-dark: #CC0000;
+    --rh-red-deeper: #A30000;
+    --rh-red-light: #FCEAE9;
+    --rh-black: #151515;
+    --rh-dark: #292929;
+    --rh-body: #1F1F1F;
+    --rh-dark-blue: #0A3060;
+    --rh-dark-green: #1B5E20;
+    --rh-dark-brown: #4A3728;
+    --rh-dark-purple: #3D2D6B;
+    --rh-dark-teal: #00574B;
+    --rh-gray-200: #D2D2D2;
+    --rh-gray-100: #EDEDED;
+    --rh-gray-50: #F5F5F5;
+    --rh-white: #FFFFFF;
+    --rh-blue: #0066CC;
+    --rh-green: #2E7D32;
+    --rh-green-light: #E8F5E9;
+    --rh-orange: #C65100;
+    --rh-orange-light: #FFF3E0;
+    --rh-purple: #5E35B1;
+    --rh-cyan: #00796B;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Red Hat Text', 'Segoe UI', sans-serif;
+    background: var(--rh-white);
+    color: var(--rh-black);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    font-size: 16px;
+  }
+
+  .deck { position: relative; width: 100vw; height: 100vh; }
+
+  .slide {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 36px 56px 44px 56px;
+    opacity: 0;
+    transform: translateX(40px);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+    pointer-events: none;
+    background: var(--rh-white);
+  }
+
+  .slide.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+
+  .slide.exit-left {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+
+  /* Red left accent bar */
+  .slide.has-bar::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 6px;
+    height: 100%;
+    background: var(--rh-red);
+  }
+
+  /* ============ Typography ============ */
+  h1 {
+    font-family: 'Red Hat Display', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 800;
+    line-height: 1.15;
+    color: var(--rh-black);
+    letter-spacing: -0.5px;
+  }
+
+  h2 {
+    font-family: 'Red Hat Display', sans-serif;
+    font-size: 2.1rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--rh-black);
+    letter-spacing: -0.3px;
+    margin-bottom: 6px;
+  }
+
+  h3 {
+    font-family: 'Red Hat Display', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--rh-black);
+  }
+
+  .section-label {
+    font-family: 'Red Hat Text', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--rh-red);
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    font-size: 1.15rem;
+    color: var(--rh-dark);
+    font-weight: 400;
+    line-height: 1.5;
+    max-width: 750px;
+  }
+
+  /* ============ Splash slide (all red) ============ */
+  .splash-slide {
+    background: var(--rh-red);
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 60px;
+  }
+
+  .splash-slide h1 {
+    font-size: 4.5rem;
+    color: var(--rh-white);
+    letter-spacing: -2px;
+    margin-bottom: 12px;
+  }
+
+  .splash-slide .splash-sub {
+    font-size: 1.5rem;
+    color: var(--rh-white);
+    font-weight: 400;
+    opacity: 0.92;
+    line-height: 1.5;
+    max-width: 700px;
+  }
+
+  .splash-slide .splash-divider {
+    width: 80px;
+    height: 4px;
+    background: var(--rh-white);
+    opacity: 0.5;
+    margin: 28px auto;
+    border-radius: 2px;
+  }
+
+  .splash-slide .splash-meta {
+    font-size: 1.1rem;
+    color: var(--rh-white);
+    opacity: 0.75;
+    margin-top: 8px;
+    font-weight: 500;
+  }
+
+  .splash-slide .splash-logo {
+    position: absolute;
+    bottom: 36px;
+    right: 56px;
+    font-family: 'Red Hat Display', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--rh-white);
+    opacity: 0.7;
+  }
+
+  /* ============ Section break slides ============ */
+  .section-slide {
+    position: relative;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .section-slide::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0;
+    width: 40%;
+    height: 100%;
+    background: var(--rh-red);
+  }
+
+  .section-slide .section-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    width: 100%;
+    align-items: center;
+    padding: 0 56px;
+  }
+
+  .section-slide .section-left {
+    width: 40%;
+    padding-right: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  .section-slide .section-left .section-num {
+    font-family: 'Red Hat Display', sans-serif;
+    font-size: 7rem;
+    font-weight: 900;
+    color: var(--rh-white);
+    opacity: 0.3;
+    line-height: 1;
+    letter-spacing: -4px;
+  }
+
+  .section-slide .section-right {
+    width: 60%;
+    padding-left: 50px;
+  }
+
+  .section-slide .section-right h1 {
+    font-size: 2.8rem;
+    color: var(--rh-black);
+    margin-bottom: 10px;
+  }
+
+  .section-slide .section-right .subtitle {
+    font-size: 1.2rem;
+    max-width: 500px;
+  }
+
+  /* ============ Layouts ============ */
+  .content {
+    width: 100%;
+    max-width: 1300px;
+  }
+
+  .content.centered { text-align: center; display: flex; flex-direction: column; align-items: center; }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin-top: 22px;
+  }
+
+  .three-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 22px;
+    margin-top: 22px;
+  }
+
+  .four-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 18px;
+    margin-top: 22px;
+  }
+
+  /* ============ Cards ============ */
+  .card {
+    background: var(--rh-white);
+    border: 1.5px solid var(--rh-gray-200);
+    border-radius: 8px;
+    padding: 22px;
+  }
+
+  .card.dashed { border-style: dashed; }
+  .card.red-border { border-color: var(--rh-red); border-width: 2px; }
+  .card.green-border { border-color: var(--rh-green); border-width: 2px; }
+  .card.orange-border { border-color: var(--rh-orange); border-width: 2px; }
+  .card.blue-border { border-color: var(--rh-blue); border-width: 2px; }
+  .card.purple-border { border-color: var(--rh-purple); border-width: 2px; }
+  .card.red-bg { background: var(--rh-red-light); border-color: #F5C3C0; }
+  .card.green-bg { background: var(--rh-green-light); border-color: #C3DFC0; }
+  .card.orange-bg { background: var(--rh-orange-light); border-color: #E0C5A0; }
+  .card.gray-bg { background: var(--rh-gray-50); }
+
+  .card h3 { margin-bottom: 8px; }
+
+  .card p {
+    font-size: 1rem;
+    color: var(--rh-body);
+    line-height: 1.55;
+  }
+
+  .card ul { list-style: none; padding: 0; }
+
+  .card ul li {
+    padding: 3px 0 3px 16px;
+    position: relative;
+    font-size: 1rem;
+    color: var(--rh-body);
+    line-height: 1.5;
+  }
+
+  .card ul li::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 13px;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--rh-red);
+  }
+
+  /* ============ Bullet list ============ */
+  .bullet-list { list-style: none; padding: 0; margin-top: 10px; }
+
+  .bullet-list li {
+    padding: 5px 0 5px 20px;
+    position: relative;
+    font-size: 1.05rem;
+    color: var(--rh-body);
+    line-height: 1.55;
+  }
+
+  .bullet-list li::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 14px;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--rh-red);
+  }
+
+  .bullet-list li strong { color: var(--rh-black); font-weight: 700; }
+
+  /* ============ Compare table ============ */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 1rem;
+  }
+
+  .compare-table th {
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 2px solid var(--rh-red);
+    color: var(--rh-dark);
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+  }
+
+  .compare-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--rh-gray-100);
+    color: var(--rh-body);
+    vertical-align: top;
+  }
+
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table td:first-child { font-weight: 600; color: var(--rh-black); }
+
+  /* ============ Callout ============ */
+  .callout {
+    border-left: 4px solid var(--rh-red);
+    background: var(--rh-gray-50);
+    padding: 16px 24px;
+    margin-top: 18px;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .callout p {
+    font-size: 1.05rem;
+    color: var(--rh-body);
+    line-height: 1.55;
+  }
+
+  .callout strong { color: var(--rh-black); }
+
+  /* ============ Lineage ============ */
+  .lineage {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 1100px;
+  }
+
+  .lineage-item {
+    flex: 1;
+    text-align: center;
+    padding: 16px 12px;
+    border-radius: 8px;
+    border: 1.5px solid var(--rh-gray-200);
+    background: var(--rh-white);
+  }
+
+  .lineage-item.active-lineage {
+    border-color: var(--rh-red);
+    border-width: 2px;
+    background: var(--rh-red-light);
+  }
+
+  .lineage-arrow {
+    padding: 0 10px;
+    color: var(--rh-dark);
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  .lineage-item .li-name {
+    font-family: 'Red Hat Display', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--rh-black);
+    margin-bottom: 2px;
+  }
+
+  .lineage-item.active-lineage .li-name { color: var(--rh-red); }
+
+  .lineage-item .li-year {
+    font-family: 'Red Hat Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--rh-dark-brown);
+    margin-bottom: 4px;
+  }
+
+  .lineage-item .li-desc {
+    font-size: 0.95rem;
+    color: var(--rh-body);
+    line-height: 1.4;
+  }
+
+  /* ============ Governance Stack ============ */
+  .gov-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 22px;
+    max-width: 900px;
+    width: 100%;
+  }
+
+  .gov-layer {
+    border: 2px solid var(--rh-gray-200);
+    padding: 20px 28px;
+    background: var(--rh-white);
+    position: relative;
+  }
+
+  .gov-layer:first-child { border-radius: 10px 10px 0 0; }
+  .gov-layer:last-child { border-radius: 0 0 10px 10px; }
+  .gov-layer + .gov-layer { border-top: none; }
+
+  .gov-layer-label {
+    font-family: 'Red Hat Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .gov-layer h3 {
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+  }
+
+  .gov-layer p {
+    font-size: 0.95rem;
+    color: var(--rh-body);
+    line-height: 1.5;
+  }
+
+  .gov-layer ul { list-style: none; padding: 0; margin-top: 4px; }
+  .gov-layer ul li {
+    padding: 2px 0 2px 16px;
+    position: relative;
+    font-size: 0.95rem;
+    color: var(--rh-body);
+    line-height: 1.5;
+  }
+  .gov-layer ul li::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 11px;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+  }
+
+  .gov-layer.layer-apps { border-color: var(--rh-blue); background: #E3F2FD; }
+  .gov-layer.layer-apps .gov-layer-label { color: var(--rh-blue); }
+  .gov-layer.layer-apps ul li::before { background: var(--rh-blue); }
+
+  .gov-layer.layer-agent { border-color: var(--rh-red); background: var(--rh-red-light); }
+  .gov-layer.layer-agent .gov-layer-label { color: var(--rh-red); }
+  .gov-layer.layer-agent ul li::before { background: var(--rh-red); }
+
+  .gov-layer.layer-model { border-color: var(--rh-orange); background: var(--rh-orange-light); }
+  .gov-layer.layer-model .gov-layer-label { color: var(--rh-orange); }
+  .gov-layer.layer-model ul li::before { background: var(--rh-orange); }
+
+  .gov-layer.layer-transparency { border-color: var(--rh-green); background: var(--rh-green-light); }
+  .gov-layer.layer-transparency .gov-layer-label { color: var(--rh-green); }
+  .gov-layer.layer-transparency ul li::before { background: var(--rh-green); }
+
+  .gov-connector {
+    width: 2px;
+    height: 0;
+    background: transparent;
+  }
+
+  /* ============ Summary cards ============ */
+  .summary-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 24px;
+    max-width: 1000px;
+    width: 100%;
+  }
+
+  .summary-card {
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    border: 1.5px solid var(--rh-gray-200);
+    border-radius: 8px;
+    padding: 18px 22px;
+    background: var(--rh-white);
+    text-align: left;
+  }
+
+  .summary-num {
+    font-family: 'Red Hat Display', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--rh-red);
+    min-width: 28px;
+  }
+
+  .summary-card h3 { margin-bottom: 4px; font-size: 1.1rem; }
+
+  .summary-card p {
+    font-size: 1rem;
+    color: var(--rh-body);
+    line-height: 1.5;
+  }
+
+  /* ============ Navigation ============ */
+  .nav {
+    position: fixed;
+    bottom: 20px;
+    right: 28px;
+    display: flex;
+    gap: 6px;
+    z-index: 100;
+  }
+
+  .nav button {
+    width: 40px; height: 40px;
+    border-radius: 6px;
+    border: 1.5px solid var(--rh-gray-200);
+    background: var(--rh-white);
+    color: var(--rh-dark);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav button:hover { border-color: var(--rh-red); color: var(--rh-red); }
+
+  .progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: var(--rh-red);
+    transition: width 0.4s ease;
+    z-index: 100;
+  }
+
+  .counter {
+    position: fixed;
+    bottom: 24px;
+    left: 28px;
+    font-family: 'Red Hat Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--rh-dark);
+    z-index: 100;
+  }
+
+  /* ============ Animations ============ */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .slide.active .fade-in { opacity: 1; transform: translateY(0); }
+  .slide.active .fade-in:nth-child(2) { transition-delay: 0.1s; }
+  .slide.active .fade-in:nth-child(3) { transition-delay: 0.2s; }
+  .slide.active .fade-in:nth-child(4) { transition-delay: 0.3s; }
+  .slide.active .fade-in:nth-child(5) { transition-delay: 0.4s; }
+
+  /* ============ Core message slide ============ */
+  .core-message {
+    background: var(--rh-black);
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 60px;
+  }
+
+  .core-message h2 {
+    color: var(--rh-white);
+    font-size: 2.4rem;
+    margin-bottom: 28px;
+  }
+
+  .core-message .core-pillars {
+    display: flex;
+    gap: 24px;
+    margin-top: 16px;
+    margin-bottom: 32px;
+  }
+
+  .core-message .core-pillar {
+    flex: 1;
+    padding: 20px 16px;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    text-align: center;
+  }
+
+  .core-message .core-pillar h3 {
+    color: var(--rh-red);
+    font-size: 1.15rem;
+    margin-bottom: 6px;
+  }
+
+  .core-message .core-pillar p {
+    color: rgba(255,255,255,0.75);
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+
+  .core-message .core-tagline {
+    font-family: 'Red Hat Display', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--rh-red);
+    margin-top: 8px;
+  }
+
+  .core-message .core-sub {
+    font-size: 1.15rem;
+    color: rgba(255,255,255,0.6);
+    margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<div class="counter" id="counter"></div>
+
+<div class="deck" id="deck">
+
+  <!-- ==================== SLIDE 0: Red Hat Splash ==================== -->
+  <div class="slide splash-slide active" data-slide="0">
+    <div class="content centered">
+      <h1 class="fade-in">Evaluating Financial AI</h1>
+      <div class="splash-divider fade-in"></div>
+      <p class="splash-sub fade-in">A Framework for Benchmarking and Governing<br>LLMs in Finance</p>
+      <p class="splash-meta fade-in">Based on: Evaluation and Benchmarking Suite for Financial LLMs and Agents</p>
+      <p class="splash-meta fade-in">SecureFinAI Lab, Columbia University (2026)</p>
+    </div>
+    <div class="splash-logo">Red Hat</div>
+  </div>
+
+  <!-- ==================== SLIDE 1: Section — The Problem ==================== -->
+  <div class="slide section-slide" data-slide="1">
+    <div class="section-inner">
+      <div class="section-left">
+        <div class="section-num">01</div>
+      </div>
+      <div class="section-right">
+        <h1>Why Financial AI Requires a Different Operating Model</h1>
+        <p class="subtitle">Understanding the unique risks of deploying AI in regulated financial environments</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 2: Risk Categories ==================== -->
+  <div class="slide has-bar" data-slide="2">
+    <div class="content">
+      <div class="section-label fade-in">The Problem</div>
+      <h2 class="fade-in">Financial AI introduces new risk categories</h2>
+      <p class="subtitle fade-in">Financial AI must be evaluated differently from consumer AI.</p>
+
+      <div class="two-col fade-in" style="margin-top:20px;">
+        <div class="card red-border">
+          <h3 style="color:var(--rh-red);">Model Risk</h3>
+          <p style="margin-bottom:8px;">General-purpose LLMs struggle with financial domain reasoning:</p>
+          <ul>
+            <li>Interpreting earnings reports and SEC filings</li>
+            <li>Analysing financial statements</li>
+            <li>Numerical reasoning in investment analysis</li>
+          </ul>
+          <p style="margin-top:8px;font-size:0.9rem;color:var(--rh-dark);">Errors directly affect risk models, trading decisions, and financial reporting.</p>
+        </div>
+        <div class="card orange-border">
+          <h3 style="color:var(--rh-orange);">Operational Risk</h3>
+          <p style="margin-bottom:8px;">AI agents autonomously perform financial tasks:</p>
+          <ul>
+            <li>Retrieving market data</li>
+            <li>Analysing financial news</li>
+            <li>Generating investment insights</li>
+          </ul>
+          <p style="margin-top:8px;font-size:0.9rem;color:var(--rh-dark);">Non-deterministic behaviour requires continuous monitoring and auditability.</p>
+        </div>
+      </div>
+
+      <div class="two-col fade-in" style="margin-top:16px;">
+        <div class="card purple-border">
+          <h3 style="color:var(--rh-purple);">Regulatory &amp; Compliance Risk</h3>
+          <ul>
+            <li>Training data provenance is unclear</li>
+            <li>Licensing restrictions are unknown</li>
+            <li>Outputs cannot be audited by regulators</li>
+          </ul>
+        </div>
+        <div class="card" style="border-style:dashed;">
+          <h3>Governance Gap</h3>
+          <p>Today there is no widely adopted framework for benchmarking financial AI, evaluating agents in production, or ensuring transparency and compliance.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 3: Core Challenge ==================== -->
+  <div class="slide has-bar" data-slide="3">
+    <div class="content">
+      <div class="section-label fade-in">The Problem</div>
+      <h2 class="fade-in">The core challenge</h2>
+      <p class="subtitle fade-in" style="margin-bottom:28px;">Financial institutions deploying GenAI face three critical questions:</p>
+
+      <div class="three-col fade-in">
+        <div class="card red-bg" style="text-align:center;padding:32px 22px;">
+          <div style="font-size:2.5rem;margin-bottom:12px;">&#x1F50D;</div>
+          <h3 style="font-size:1.15rem;">Which models can we trust?</h3>
+          <p style="margin-top:8px;font-size:0.95rem;">How do we evaluate financial reasoning capability and accuracy?</p>
+        </div>
+        <div class="card orange-bg" style="text-align:center;padding:32px 22px;">
+          <div style="font-size:2.5rem;margin-bottom:12px;">&#x2699;</div>
+          <h3 style="font-size:1.15rem;">How do we safely operate AI agents?</h3>
+          <p style="margin-top:8px;font-size:0.95rem;">How do we monitor autonomous systems in production?</p>
+        </div>
+        <div class="card green-bg" style="text-align:center;padding:32px 22px;">
+          <div style="font-size:2.5rem;margin-bottom:12px;">&#x1F4CB;</div>
+          <h3 style="font-size:1.15rem;">How do we meet audit requirements?</h3>
+          <p style="margin-top:8px;font-size:0.95rem;">How do we ensure regulatory compliance and model transparency?</p>
+        </div>
+      </div>
+
+      <div class="callout fade-in">
+        <p>This presentation outlines a framework addressing all three.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 4: Section — Lifecycle ==================== -->
+  <div class="slide section-slide" data-slide="4">
+    <div class="section-inner">
+      <div class="section-left">
+        <div class="section-num">02</div>
+      </div>
+      <div class="section-right">
+        <h1>The Financial AI Lifecycle</h1>
+        <p class="subtitle">From experimentation to governed deployment</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 5: Three Stages ==================== -->
+  <div class="slide has-bar" data-slide="5">
+    <div class="content">
+      <div class="section-label fade-in">Lifecycle</div>
+      <h2 class="fade-in">Three stages of financial LLM maturity</h2>
+      <p class="subtitle fade-in">Financial AI is evolving through three maturity stages.</p>
+
+      <div class="lineage fade-in" style="margin-top:28px;">
+        <div class="lineage-item">
+          <div class="li-year">2023</div>
+          <div class="li-name">Exploration</div>
+          <div class="li-desc">Early financial LLM development. BloombergGPT, FinGPT. Can LLMs understand financial language?</div>
+        </div>
+        <div class="lineage-arrow">&#x2192;</div>
+        <div class="lineage-item">
+          <div class="li-year">2024</div>
+          <div class="li-name">Readiness</div>
+          <div class="li-desc">Shift to deployment readiness. Systematic benchmarking, financial datasets, emergence of agents.</div>
+        </div>
+        <div class="lineage-arrow">&#x2192;</div>
+        <div class="lineage-item active-lineage">
+          <div class="li-year">2025</div>
+          <div class="li-name">Governance</div>
+          <div class="li-desc">Safe and compliant deployment. AI governance frameworks, operational evaluation, transparency standards.</div>
+        </div>
+      </div>
+
+      <div class="callout fade-in" style="margin-top:28px;">
+        <p>The output of the Exploration stage is the <strong>Open FinLLM Leaderboard</strong>. Readiness produced <strong>evaluation pipelines and financial agents</strong>. Governance introduces <strong>AgentOps and model transparency</strong>.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 6: Section — Benchmarking ==================== -->
+  <div class="slide section-slide" data-slide="6">
+    <div class="section-inner">
+      <div class="section-left">
+        <div class="section-num">03</div>
+      </div>
+      <div class="section-right">
+        <h1>Benchmarking Financial AI</h1>
+        <p class="subtitle">Standardised evaluation across financial tasks</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 7: Leaderboard ==================== -->
+  <div class="slide has-bar" data-slide="7">
+    <div class="content">
+      <div class="section-label fade-in">Benchmarking</div>
+      <h2 class="fade-in">The Open FinLLM Leaderboard</h2>
+      <p class="subtitle fade-in">Standardised evaluation across 42 financial datasets, organised into three capability areas.</p>
+
+      <div class="three-col fade-in" style="margin-top:20px;">
+        <div class="card red-border">
+          <h3 style="color:var(--rh-red);">Understanding Financial Language</h3>
+          <ul>
+            <li>Information extraction</li>
+            <li>Sentiment analysis</li>
+            <li>Classification</li>
+          </ul>
+        </div>
+        <div class="card orange-border">
+          <h3 style="color:var(--rh-orange);">Financial Reasoning</h3>
+          <ul>
+            <li>Answering questions about financial data</li>
+            <li>Summarising earnings reports</li>
+            <li>Analysing regulatory filings</li>
+          </ul>
+        </div>
+        <div class="card green-border">
+          <h3 style="color:var(--rh-green);">Financial Decision Tasks</h3>
+          <ul>
+            <li>Credit risk scoring</li>
+            <li>Market forecasting</li>
+            <li>Trading and investment simulations</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout fade-in">
+        <p>Hosted on <strong>HuggingFace</strong> in collaboration with <strong>Linux Foundation</strong>, <strong>PyTorch Foundation</strong>, and <strong>SecureFinAI Lab</strong>. Models are ranked by both performance and openness classification.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 8: Section — Agents ==================== -->
+  <div class="slide section-slide" data-slide="8">
+    <div class="section-inner">
+      <div class="section-left">
+        <div class="section-num">04</div>
+      </div>
+      <div class="section-right">
+        <h1>From Models to Agents</h1>
+        <p class="subtitle">Financial AI agents introduce new capabilities and new risks</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 9: Agents ==================== -->
+  <div class="slide has-bar" data-slide="9">
+    <div class="content">
+      <div class="section-label fade-in">Financial Agents</div>
+      <h2 class="fade-in">Agents change the risk profile</h2>
+      <p class="subtitle fade-in">Financial AI is moving from static models to autonomous agents.</p>
+
+      <div class="two-col fade-in" style="margin-top:18px;">
+        <div>
+          <h3 style="margin-bottom:12px;">New agent capabilities</h3>
+          <ul class="bullet-list">
+            <li><strong>Multi-step reasoning</strong> across financial data</li>
+            <li><strong>Tool usage</strong> for data retrieval and analysis</li>
+            <li><strong>Autonomous decision-making</strong></li>
+            <li><strong>Real-time financial data</strong> retrieval</li>
+          </ul>
+
+          <div class="callout" style="margin-top:18px;">
+            <p>Traditional LLM evaluation measures <strong>answers</strong>.<br>Agent evaluation must measure <strong>behaviour</strong>.</p>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="card red-bg">
+            <h3>Agentic FinSearch</h3>
+            <p>Autonomous research agent retrieving financial data and analysing news sentiment.</p>
+          </div>
+          <div class="card orange-bg">
+            <h3>Financial Tutor</h3>
+            <p>AI-powered financial education: CFA preparation and financial training at scale.</p>
+          </div>
+          <div class="card green-bg">
+            <h3>FinSight Agent</h3>
+            <p>Multi-agent system analysing earnings calls with self-evaluation and dynamic guardrails.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 10: Section — Governance ==================== -->
+  <div class="slide section-slide" data-slide="10">
+    <div class="section-inner">
+      <div class="section-left">
+        <div class="section-num">05</div>
+      </div>
+      <div class="section-right">
+        <h1>Governing Financial AI Systems</h1>
+        <p class="subtitle">Operational evaluation and model transparency</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 11: AgentOps ==================== -->
+  <div class="slide has-bar" data-slide="11">
+    <div class="content">
+      <div class="section-label fade-in">Governance</div>
+      <h2 class="fade-in">AgentOps: Evaluating AI agents in practice</h2>
+      <p class="subtitle fade-in">Two layers of governance for the AI agent lifecycle.</p>
+
+      <div class="two-col fade-in" style="margin-top:22px;">
+        <div class="card red-border" style="padding:28px;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+            <div style="width:44px;height:44px;border-radius:50%;background:var(--rh-red);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <span style="color:var(--rh-white);font-family:'Red Hat Display',sans-serif;font-size:1.3rem;font-weight:800;">1</span>
+            </div>
+            <h3 style="font-size:1.2rem;">Development Governance (Inner Loop)</h3>
+          </div>
+          <p style="margin-bottom:10px;">"Glass box" evaluation of agent behaviour during development.</p>
+          <ul>
+            <li>Reasoning validation</li>
+            <li>Tool usage testing</li>
+            <li>Context adherence</li>
+            <li>Safety guardrails</li>
+          </ul>
+        </div>
+        <div class="card orange-border" style="padding:28px;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+            <div style="width:44px;height:44px;border-radius:50%;background:var(--rh-orange);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <span style="color:var(--rh-white);font-family:'Red Hat Display',sans-serif;font-size:1.3rem;font-weight:800;">2</span>
+            </div>
+            <h3 style="font-size:1.2rem;">Operational Governance (Outer Loop)</h3>
+          </div>
+          <p style="margin-bottom:10px;">Continuous evaluation of AI systems in production.</p>
+          <ul>
+            <li>Decision tracing</li>
+            <li>Audit logs</li>
+            <li>LLM-as-a-Judge safety scoring</li>
+            <li>Human-in-the-loop escalation</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout fade-in">
+        <p>Production failures are <strong>fed back into training datasets</strong> to continuously improve reliability. This closes the loop between development and operations.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 12: MOF ==================== -->
+  <div class="slide has-bar" data-slide="12">
+    <div class="content">
+      <div class="section-label fade-in">Governance</div>
+      <h2 class="fade-in">Model Openness Framework</h2>
+      <p class="subtitle fade-in">Avoiding "open-washing" in AI model procurement.</p>
+
+      <p class="fade-in" style="margin-top:14px;font-size:1.05rem;color:var(--rh-body);line-height:1.55;">Many models claim to be open but hide training datasets, licensing terms, and development processes.</p>
+
+      <table class="compare-table fade-in" style="max-width:800px;">
+        <thead>
+          <tr>
+            <th>Class</th>
+            <th>Level of Openness</th>
+            <th>What's Shared</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Class III</td>
+            <td>Open Model</td>
+            <td>Partially open components: model weights, card, evaluation results</td>
+          </tr>
+          <tr>
+            <td>Class II</td>
+            <td>Open Tooling</td>
+            <td>Training code, evaluation code, inference code, and tools</td>
+          </tr>
+          <tr>
+            <td style="color:var(--rh-red);">Class I</td>
+            <td style="color:var(--rh-red);font-weight:600;">Open Science</td>
+            <td>Fully open: data, code, parameters, research papers, documentation</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout fade-in">
+        <p>This enables financial institutions to <strong>select models based on transparency, auditability, and compliance readiness</strong> &mdash; not just benchmark performance.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 13: Governance Stack ==================== -->
+  <div class="slide has-bar" data-slide="13">
+    <div class="content">
+      <div class="section-label fade-in">Governance</div>
+      <h2 class="fade-in">The Financial AI Governance Stack</h2>
+      <p class="subtitle fade-in">A layered architecture for safe deployment of AI-powered financial systems.</p>
+
+      <div class="gov-stack fade-in" style="margin-top:24px;">
+        <div class="gov-layer layer-apps">
+          <div class="gov-layer-label">Business Applications</div>
+          <h3>Financial AI Use Cases</h3>
+          <ul>
+            <li>Trading assistants</li>
+            <li>Risk analysis tools</li>
+            <li>Financial research agents</li>
+            <li>Customer advisory systems</li>
+          </ul>
+        </div>
+        <div class="gov-layer layer-agent">
+          <div class="gov-layer-label">Agent Governance Layer &mdash; AgentOps</div>
+          <h3>Operational Controls for AI Agents</h3>
+          <ul>
+            <li>Decision tracing</li>
+            <li>Tool usage monitoring</li>
+            <li>LLM-as-a-Judge evaluation</li>
+            <li>Human escalation paths</li>
+          </ul>
+        </div>
+        <div class="gov-layer layer-model">
+          <div class="gov-layer-label">Model Governance Layer &mdash; FinLLM Benchmarking</div>
+          <h3>Ensuring Models Are Safe to Deploy</h3>
+          <ul>
+            <li>Financial benchmark testing</li>
+            <li>Numerical reasoning validation</li>
+            <li>Hallucination testing</li>
+          </ul>
+        </div>
+        <div class="gov-layer layer-transparency">
+          <div class="gov-layer-label">Transparency &amp; Compliance &mdash; Model Openness Framework</div>
+          <h3>Model Provenance and Auditability</h3>
+          <ul>
+            <li>Training data transparency</li>
+            <li>Licensing clarity</li>
+            <li>Reproducibility</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 14: Section — What This Means ==================== -->
+  <div class="slide section-slide" data-slide="14">
+    <div class="section-inner">
+      <div class="section-left">
+        <div class="section-num">06</div>
+      </div>
+      <div class="section-right">
+        <h1>What This Means for Banks</h1>
+        <p class="subtitle">Practical governance layers for financial AI deployment</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 15: Three Layers ==================== -->
+  <div class="slide has-bar" data-slide="15">
+    <div class="content">
+      <div class="section-label fade-in">For Financial Institutions</div>
+      <h2 class="fade-in">Three governance layers for financial AI</h2>
+      <p class="subtitle fade-in">Banks deploying GenAI should implement three governance layers.</p>
+
+      <div class="summary-cards fade-in">
+        <div class="summary-card" style="border-color:var(--rh-red);">
+          <div class="summary-num">1</div>
+          <div>
+            <h3>Model Evaluation</h3>
+            <p>Benchmark models against financial datasets. Can the model reason about financial statements? Does it hallucinate in regulatory documents?</p>
+          </div>
+        </div>
+        <div class="summary-card" style="border-color:var(--rh-orange);">
+          <div class="summary-num" style="color:var(--rh-orange);">2</div>
+          <div>
+            <h3>Agent Monitoring</h3>
+            <p>Track AI agents operating in production. Decision tracing, audit logs, escalation procedures, and runtime evaluation of agent behaviour.</p>
+          </div>
+        </div>
+        <div class="summary-card" style="border-color:var(--rh-green);">
+          <div class="summary-num" style="color:var(--rh-green);">3</div>
+          <div>
+            <h3>Model Transparency</h3>
+            <p>Deploy only models meeting transparency requirements. Training data provenance, licensing clarity, reproducibility, and regulatory auditability.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 16: Core Message ==================== -->
+  <div class="slide core-message" data-slide="16">
+    <div class="content centered">
+      <h2 class="fade-in">Financial AI should be treated like<br>regulated financial infrastructure</h2>
+      <div class="core-pillars fade-in">
+        <div class="core-pillar">
+          <h3>Benchmarked</h3>
+          <p>Against standardised financial tasks</p>
+        </div>
+        <div class="core-pillar">
+          <h3>Monitored</h3>
+          <p>Through operational evaluation in production</p>
+        </div>
+        <div class="core-pillar">
+          <h3>Governed</h3>
+          <p>Through compliance and transparency frameworks</p>
+        </div>
+        <div class="core-pillar">
+          <h3>Auditable</h3>
+          <p>With traceable model behaviour</p>
+        </div>
+      </div>
+      <div class="core-tagline fade-in">This is not consumer AI.</div>
+      <div class="core-sub fade-in">This is financial infrastructure.</div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 17: End Slide ==================== -->
+  <div class="slide splash-slide" data-slide="17">
+    <div class="content centered">
+      <h1 class="fade-in">Thank You</h1>
+      <div class="splash-divider fade-in"></div>
+      <p class="splash-sub fade-in">Questions &amp; Discussion</p>
+    </div>
+    <div class="splash-logo">Red Hat</div>
+  </div>
+
+</div>
+
+<!-- Navigation -->
+<div class="nav">
+  <button onclick="go(-1)" title="Previous">&#x2190;</button>
+  <button onclick="go(1)" title="Next">&#x2192;</button>
+</div>
+
+<script>
+  const deck = document.getElementById('deck');
+  const slides = deck.querySelectorAll('.slide');
+  const total = slides.length;
+  let cur = 0;
+
+  function show(n) {
+    slides.forEach((s, i) => {
+      s.classList.remove('active', 'exit-left');
+      if (i < n) s.classList.add('exit-left');
+    });
+    slides[n].classList.add('active');
+    document.getElementById('progress').style.width = ((n / (total - 1)) * 100) + '%';
+    document.getElementById('counter').textContent = (n + 1) + ' / ' + total;
+  }
+
+  function go(dir) {
+    cur = Math.max(0, Math.min(total - 1, cur + dir));
+    show(cur);
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
+    if (e.key === 'Home') { e.preventDefault(); cur = 0; show(cur); }
+    if (e.key === 'End') { e.preventDefault(); cur = total - 1; show(cur); }
+  });
+
+  // Touch support
+  let touchStartX = 0;
+  document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
+  document.addEventListener('touchend', e => {
+    const diff = e.changedTouches[0].screenX - touchStartX;
+    if (Math.abs(diff) > 50) go(diff < 0 ? 1 : -1);
+  });
+
+  show(0);
+</script>
+
+</body>
+</html>

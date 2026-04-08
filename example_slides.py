@@ -3,16 +3,16 @@
 Example slides demonstrating every slide type available in the presentation system.
 
 Run this to generate a reference deck showing all available layouts:
-    source /home/bryon/Documents/FinOS/.venv/bin/activate
+    source ./FinOS/.venv/bin/activate
     python3 example_slides.py
 """
 
 import sys
-sys.path.insert(0, '/home/bryon/Documents/FinOS/gen-ai-presentation-system-prompt')
+sys.path.insert(0, './FinOS/gen-ai-presentation-system-prompt')
 
 from presentation_helpers import *
 
-OUTPUT = '/home/bryon/Documents/FinOS/example_slides.pptx'
+OUTPUT = './FinOS/example_slides.pptx'
 
 prs = create_presentation()
 
